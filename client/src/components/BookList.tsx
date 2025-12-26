@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Book } from '../types/Book';
 import { bookService } from '../services/bookService';
+import { useAuth } from '../context/AuthContext';
 import './BookList.css';
 
 const BookList = () => {
@@ -9,6 +10,7 @@ const BookList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { isAdmin } = useAuth();
 
     useEffect(() => {
         fetchBooks();
@@ -52,12 +54,14 @@ const BookList = () => {
         <div className="container">
             <div className="page-header">
                 <h1>Library Books</h1>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => navigate('/add-book')}
-                >
-                    ➕ Add New Book
-                </button>
+                {isAdmin && (
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => navigate('/add-book')}
+                    >
+                        ➕ Add New Book
+                    </button>
+                )}
             </div>
 
             {error && (
@@ -69,7 +73,7 @@ const BookList = () => {
             {books.length === 0 ? (
                 <div className="card">
                     <p className="empty-state">
-                        No books found. Add your first book to get started!
+                        No books found. {isAdmin ? 'Add your first book to get started!' : 'Check back later!'}
                     </p>
                 </div>
             ) : (
@@ -84,7 +88,7 @@ const BookList = () => {
                                     <th>Year</th>
                                     <th>Genre</th>
                                     <th>Copies</th>
-                                    <th>Actions</th>
+                                    {isAdmin && <th>Actions</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,22 +106,24 @@ const BookList = () => {
                                                 {book.copiesAvailable}
                                             </span>
                                         </td>
-                                        <td>
-                                            <div className="action-buttons">
-                                                <button
-                                                    onClick={() => handleEdit(book.id)}
-                                                    className="btn btn-sm btn-secondary"
-                                                >
-                                                    ✏️ Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(book.id, book.title)}
-                                                    className="btn btn-sm btn-danger"
-                                                >
-                                                    🗑️ Delete
-                                                </button>
-                                            </div>
-                                        </td>
+                                        {isAdmin && (
+                                            <td>
+                                                <div className="action-buttons">
+                                                    <button
+                                                        onClick={() => handleEdit(book.id)}
+                                                        className="btn btn-sm btn-secondary"
+                                                    >
+                                                        ✏️ Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(book.id, book.title)}
+                                                        className="btn btn-sm btn-danger"
+                                                    >
+                                                        🗑️ Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
